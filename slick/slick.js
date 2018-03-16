@@ -49,6 +49,7 @@
                 autoplay: false,
                 autoplaySpeed: 3000,
                 centerMode: false,
+                disableOffsetForCenterMode: false,
                 centerPadding: '50px',
                 cssEase: 'ease',
                 customPaging: function(slider, i) {
@@ -1048,7 +1049,12 @@
                 counter += _.options.slidesToScroll <= _.options.slidesToShow ? _.options.slidesToScroll : _.options.slidesToShow;
             }
         } else if (_.options.centerMode === true) {
-            pagerQty = _.slideCount;
+            if (_.options.disableOffsetForCenterMode) {
+                var actualSlideCount = (_.slideCount - (_.options.slidesToShow - _.options.slidesToScroll));
+                pagerQty = actualSlideCount;
+            } else {
+                pagerQty = _.slideCount;
+            }
         } else if(!_.options.asNavFor) {
             pagerQty = 1 + Math.ceil((_.slideCount - _.options.slidesToShow) / _.options.slidesToScroll);
         }else {
@@ -1106,7 +1112,9 @@
             _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2) - _.slideWidth;
         } else if (_.options.centerMode === true) {
             _.slideOffset = 0;
-            _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
+            if (!_.options.disableOffsetForCenterMode) {
+                _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
+            }
         }
 
         if (_.options.vertical === false) {
@@ -1203,7 +1211,11 @@
         var _ = this,
             slidesTraversed, swipedSlide, centerOffset;
 
-        centerOffset = _.options.centerMode === true ? _.slideWidth * Math.floor(_.options.slidesToShow / 2) : 0;
+        if (_.options.disableOffsetForCenterMode) {
+            centerOffset = 0;
+        } else {
+            centerOffset = _.options.centerMode === true ? _.slideWidth * Math.floor(_.options.slidesToShow / 2) : 0;
+        }
 
         if (_.options.swipeToSlide === true) {
             _.$slideTrack.find('.slick-slide').each(function(index, slide) {
@@ -2431,6 +2443,14 @@
             animSlide = targetSlide;
         }
 
+        if (_.options.centerMode === true && _.options.disableOffsetForCenterMode) {
+            var actualSlideCount = (_.slideCount - (_.options.slidesToShow - _.options.slidesToScroll));
+            if (index >= actualSlideCount) {
+                _.postSlide(animSlide);
+                return;
+            }
+        }
+
         _.animating = true;
 
         _.$slider.trigger('beforeChange', [_, _.currentSlide, animSlide]);
@@ -2803,6 +2823,8 @@
 
         centerOffset = Math.floor(_.options.slidesToShow / 2);
 
+        var actualSlideCount = (_.slideCount - (_.options.slidesToShow - _.options.slidesToScroll));
+
         if ( _.options.arrows === true &&
             _.slideCount > _.options.slidesToShow &&
             !_.options.infinite ) {
@@ -2824,6 +2846,11 @@
 
                 _.$nextArrow.addClass('slick-disabled').attr('aria-disabled', 'true');
                 _.$prevArrow.removeClass('slick-disabled').attr('aria-disabled', 'false');
+
+            } else if (_.options.centerMode === true && _.options.disableOffsetForCenterMode && _.currentSlide === (actualSlideCount - _.options.slidesToScroll)) {
+
+              _.$nextArrow.addClass('slick-disabled').attr('aria-disabled', 'true');
+              _.$prevArrow.removeClass('slick-disabled').attr('aria-disabled', 'false');
 
             }
 
