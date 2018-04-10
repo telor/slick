@@ -2443,6 +2443,18 @@
             animSlide = targetSlide;
         }
 
+        var direction;
+
+        if (targetSlide < 0) {
+            direction = 'right';
+        } else if (targetSlide >= _.slideCount) {
+            direction = 'left';
+        } else if (targetSlide > _.currentSlide) {
+            direction = 'left';
+        } else {
+            direction = 'right';
+        }
+
         if (_.options.centerMode === true && _.options.disableOffsetForCenterMode) {
             var actualSlideCount = (_.slideCount - (_.options.slidesToShow - _.options.slidesToScroll));
             if (index >= actualSlideCount) {
@@ -2453,7 +2465,7 @@
 
         _.animating = true;
 
-        _.$slider.trigger('beforeChange', [_, _.currentSlide, animSlide]);
+        _.$slider.trigger('beforeChange', [_, _.currentSlide, animSlide, direction, _.slideCount, targetSlide]);
 
         oldSlide = _.currentSlide;
         _.currentSlide = animSlide;
